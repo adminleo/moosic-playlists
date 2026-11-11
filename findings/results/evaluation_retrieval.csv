@@ -1,0 +1,4 @@
+method,same_artist_pct,times_chance
+20 random from the catalogue,0.2,1.0
+20 random from the same cluster,0.78,3.9
+20 nearest neighbours,3.86,19.5

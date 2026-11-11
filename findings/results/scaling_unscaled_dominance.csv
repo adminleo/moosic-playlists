@@ -1,0 +1,11 @@
+feature,between_cluster_variance_share
+duration_ms,67.199
+loudness,1.169
+energy,0.686
+acousticness,0.53
+danceability,0.461
+instrumentalness,0.408
+valence,0.405
+tempo,0.162
+speechiness,0.06
+liveness,0.034

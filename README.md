@@ -33,6 +33,11 @@ cluster manage 3.9×. The signal is there and it is not subtle.
   dance to and joyless (energy +0.91σ, danceability −1.14σ, valence −0.83σ).
   Those are recording and production descriptions. A cluster defined by "sounds
   like it was played live" spans every genre there is.
+- **PCA finds no shortcut either.** Reaching 80 % of the variance takes four of
+  the nine components. And the leading component is `instrumentalness` with a
+  loading of 0.95 under the chosen scaling, but `loudness` and `energy` under
+  `StandardScaler` — PC1 reports the preprocessing decision at least as loudly
+  as it reports the music, which is why it is run under both.
 - **The same song in two recordings usually splits.** 92 titles in this
   catalogue were recorded by more than one artist. Only **22 of them (23.9 %)**
   land in the same cluster. The model is grouping production, not music.

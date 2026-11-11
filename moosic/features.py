@@ -31,3 +31,25 @@ def matrix(d: pd.DataFrame, how: str = "quantile") -> np.ndarray:
     if how == "none":
         return X
     raise ValueError(f"unknown scaling: {how}")
+
+
+def pca_report(d: pd.DataFrame, how: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Variance explained, and what the leading component is actually made of.
+
+    Run under both scalings, because the answer differs and the difference is
+    the point: PC1 reports the preprocessing choice at least as loudly as it
+    reports the music.
+    """
+    from sklearn.decomposition import PCA
+
+    X = matrix(d, how)
+    p = PCA().fit(X)
+    ev = p.explained_variance_ratio_
+    variance = pd.DataFrame({
+        "component": [f"PC{i+1}" for i in range(len(ev))],
+        "explained": ev.round(3),
+        "cumulative": ev.cumsum().round(3),
+    })
+    loadings = pd.DataFrame(p.components_[:3].T, index=FEATURES,
+                            columns=["PC1", "PC2", "PC3"]).round(2)
+    return variance, loadings.reset_index(names="feature")

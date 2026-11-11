@@ -93,6 +93,32 @@ Stability is worth separating from quality. At k=4 the partition is perfectly
 reproducible across seeds (ARI 1.000) and still almost structureless
 (silhouette 0.309). Reproducible and meaningful are different claims.
 
+## 3b. PCA says the same thing, and exposes the scaling choice
+`pca_variance_quantile.csv`, `pca_loadings_quantile.csv`, and the `_standard` pair
+
+Nine features do not compress. Reaching 80 % of the variance takes **four**
+components under the quantile transform and **five** under `StandardScaler`;
+90 % takes six. There is no two- or three-dimensional structure hiding behind
+the features, which is the same conclusion §3 reaches from silhouette, by an
+independent route.
+
+The leading component is more interesting than the variance curve:
+
+| scaling | PC1 explains | PC1 is mostly |
+|---|---:|---|
+| quantile | 47.5 % | `instrumentalness` (loading **0.95**) |
+| standard | 35.7 % | `loudness` (0.50) and `energy` (0.45) |
+
+Under the quantile transform, the single largest axis of variation in the
+dataset *is* the feature that §2 showed carries 2.5× everyone else's spread
+because a quarter of its values are tied at zero. PCA is faithfully reporting a
+preprocessing decision. Under `StandardScaler` the same component becomes "loud
+and energetic", which is at least a musical idea.
+
+This is the argument for running PCA under both scalings rather than one. A
+single run would have produced a confident sentence about the dominant dimension
+of music, and the dimension belonged to the scaler.
+
 ## 4. The features do carry human-detectable similarity
 `evaluation_retrieval.csv`
 

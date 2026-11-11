@@ -86,6 +86,12 @@ def main() -> int:
     emit("evaluation_retrieval",
          evaluate.retrieval_vs_clusters(X, labels, artists))
 
+    # --- 3b. PCA, under both scalings -------------------------------------
+    for how in ("quantile", "standard"):
+        var, load = features.pca_report(d, how)
+        emit(f"pca_variance_{how}", var)
+        emit(f"pca_loadings_{how}", load)
+
     # --- 4. the playlists themselves --------------------------------------
     # Published as Spotify track id + assigned cluster only. The id is a public
     # identifier and the cluster is this project's output; the track list, the

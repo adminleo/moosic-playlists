@@ -75,6 +75,14 @@ exactly and clusters worse. The trade is documented rather than hidden, and
 pinned in `tests/test_moosic.py` so swapping the transform cannot quietly change
 which feature dominates.
 
+## Five minutes on it
+
+The presentation lives in [`presentation/`](presentation/) — the slides as text
+in its README, and [`slides.html`](presentation/slides.html) to actually present
+from (arrow keys). Five slides: the question · the signal is real (19.5×) · the
+clusters describe recording, not feeling (23.9 %) · the scaling trap (2.6 to
+61.7 minutes, no error raised) · seed and neighbours instead.
+
 ## Running it
 
 ```bash

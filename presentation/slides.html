@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moosic — can audio features make playlists?</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff; --fg: #1f2328; --muted: #59636e; --faint: #818b98;
+    --line: #d1d9e0; --accent: #0969da; --warn: #9a6700; --warnbg: #fff8c5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --faint:#6e7681;
+            --line:#3d444d; --accent:#4493f8; --warn:#d29922; --warnbg:#282215; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.55 -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  .deck { height: 100svh; display: grid; grid-template-rows: 1fr auto; }
+  .slide {
+    display: none; padding: clamp(24px, 5vw, 64px);
+    max-width: 1100px; margin: 0 auto; width: 100%; align-content: center;
+    overflow-y: auto;
+  }
+  .slide.on { display: grid; }
+  .num { font-size: 13px; letter-spacing: .14em; text-transform: uppercase;
+         color: var(--faint); margin-bottom: 10px; }
+  h1 { font-size: clamp(26px, 4.2vw, 44px); line-height: 1.12; margin: 0 0 18px;
+       font-weight: 600; letter-spacing: -.02em; }
+  p  { margin: 0 0 14px; max-width: 62ch; }
+  .lead { font-size: clamp(17px, 2vw, 21px); color: var(--muted); }
+  table { border-collapse: collapse; margin: 18px 0; font-size: 15px; }
+  th, td { padding: 7px 16px 7px 0; text-align: left; border-bottom: 1px solid var(--line); }
+  td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+  strong { font-weight: 600; }
+  .big { font-size: clamp(22px, 3vw, 30px); font-weight: 600; margin: 4px 0 2px; }
+  .cap { color: var(--faint); font-size: 14px; }
+  .warn { background: var(--warnbg); border-left: 3px solid var(--warn);
+          padding: 12px 16px; margin: 16px 0; }
+  blockquote { margin: 22px 0 0; padding-left: 18px; border-left: 3px solid var(--accent);
+               color: var(--muted); max-width: 62ch; }
+  .bar { display: flex; justify-content: space-between; align-items: center;
+         padding: 10px clamp(24px, 5vw, 64px); border-top: 1px solid var(--line);
+         font-size: 13px; color: var(--faint); }
+  .bar button { font: inherit; color: var(--accent); background: none; border: 0;
+                cursor: pointer; padding: 4px 8px; }
+  ul { max-width: 62ch; padding-left: 20px; } li { margin-bottom: 7px; }
+</style>
+
+<div class="deck">
+  <main id="slides">
+
+    <section class="slide on">
+      <div class="num">1 — the question</div>
+      <h1>Moosic builds playlists by hand. It does not scale.</h1>
+      <p class="lead">Spotify publishes nine numeric features per track.
+        Can K-Means turn those into playlists?</p>
+      <p>The honest version has two halves, and they do not get the same answer:
+        is there similarity signal in the features at all — and is partitioning
+        the catalogue the right way to use it?</p>
+    </section>
+
+    <section class="slide">
+      <div class="num">2 — yes, the signal is real</div>
+      <h1>Nearest neighbours share an artist 19.5× more often than chance</h1>
+      <p>A proxy anyone can check: two tracks by the same artist are usually
+        more alike than two at random.</p>
+      <table>
+        <tr><th>Twenty songs drawn…</th><th class="n">same artist</th><th class="n">vs chance</th></tr>
+        <tr><td>at random from the catalogue</td><td class="n">0.20 %</td><td class="n">1×</td></tr>
+        <tr><td>at random from the same cluster</td><td class="n">0.78 %</td><td class="n"><strong>3.9×</strong></td></tr>
+        <tr><td>as the nearest neighbours of a seed</td><td class="n">3.86 %</td><td class="n"><strong>19.5×</strong></td></tr>
+      </table>
+      <p>The seed already beats the cluster <strong>five times over</strong>.
+        That is the first hint about what the product should do.</p>
+    </section>
+
+    <section class="slide">
+      <div class="num">3 — but the clusters are about recording</div>
+      <h1>Three measurements, one conclusion</h1>
+      <p><strong>No natural number of playlists.</strong> Silhouette falls from
+        0.309 at k=4 to 0.123 at k=40 with no peak. A continuum — <em>k</em> is a
+        business decision wearing a lab coat.</p>
+      <p><strong>The separating features are production.</strong> Quiet acoustic
+        instrumentals (loudness −2.02σ, energy −1.85σ, acousticness +1.80σ).
+        Energetic, undanceable, joyless (energy +0.91σ, danceability −1.14σ,
+        valence −0.83σ). "Sounds like it was played live" spans every genre.</p>
+      <p><strong>The same song, recorded twice, splits.</strong> 92 titles exist
+        in two artists' recordings. Only <strong>22 — 23.9 % — land in the same
+        cluster.</strong></p>
+    </section>
+
+    <section class="slide">
+      <div class="num">4 — the trap</div>
+      <h1>Forget to scale, and you get a ladder of track length</h1>
+      <table>
+        <tr><th>Cluster</th><th class="n">Tracks</th><th class="n">Mean duration</th></tr>
+        <tr><td>6</td><td class="n">1,228</td><td class="n">2.6 min</td></tr>
+        <tr><td>0</td><td class="n">2,121</td><td class="n">3.6 min</td></tr>
+        <tr><td>4</td><td class="n">1,223</td><td class="n">4.7 min</td></tr>
+        <tr><td>2</td><td class="n">450</td><td class="n">6.3 min</td></tr>
+        <tr><td>7</td><td class="n">100</td><td class="n">9.4 min</td></tr>
+        <tr><td>1</td><td class="n">35</td><td class="n">16.0 min</td></tr>
+        <tr><td>5</td><td class="n">12</td><td class="n">25.3 min</td></tr>
+        <tr><td>3</td><td class="n">2</td><td class="n">61.7 min</td></tr>
+      </table>
+      <div class="warn"><strong>No error is raised.</strong> Tempo runs to ~200
+        and duration to millions of milliseconds, so the distance metric is
+        effectively one feature — and the output is a plausible-looking list of
+        playlists sorted by song length.</div>
+    </section>
+
+    <section class="slide">
+      <div class="num">5 — what to do instead</div>
+      <h1>Seed and neighbours, not partitioning</h1>
+      <p>Moosic's product is a playlist built around a mood. That is a retrieval
+        problem, not a clustering one.</p>
+      <ul>
+        <li>No choice of <em>k</em> to defend.</li>
+        <li>A curator steers by picking the seed.</li>
+        <li><strong>3.86 % against the cluster's 0.78 %</strong> on the same yardstick.</li>
+      </ul>
+      <p>Clustering keeps a job — a coarse first pass, eight buckets a curator
+        can work through. It is just not the thing that makes the playlist.</p>
+      <blockquote>The features were good enough and the method was wrong, and no
+        accuracy number anywhere would have told us — because this failure only
+        shows up when you ask what the clusters are made of.</blockquote>
+    </section>
+
+  </main>
+  <div class="bar">
+    <span>Moosic — can audio features make playlists?</span>
+    <span>
+      <button onclick="go(-1)">← back</button>
+      <span id="count"></span>
+      <button onclick="go(1)">next →</button>
+    </span>
+  </div>
+</div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let i = 0;
+  function show() {
+    slides.forEach((s, n) => s.classList.toggle('on', n === i));
+    document.getElementById('count').textContent = `${i + 1} / ${slides.length}`;
+    location.hash = i + 1;
+  }
+  function go(step) { i = Math.min(slides.length - 1, Math.max(0, i + step)); show(); }
+  addEventListener('keydown', e => {
+    if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(1); }
+    if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+    if (e.key === 'Home') { i = 0; show(); }
+    if (e.key === 'End') { i = slides.length - 1; show(); }
+  });
+  const start = parseInt(location.hash.slice(1), 10);
+  if (start >= 1 && start <= slides.length) i = start - 1;
+  show();
+</script>
+</html>
